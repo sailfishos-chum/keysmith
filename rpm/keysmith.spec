@@ -35,6 +35,21 @@ Requires:       qt-runner
 
 %description
 OTP client for Plasma Mobile and Desktop
+%if 0%{?_chum}
+PackageName: Keysmith
+Type: desktop-application
+DeveloperName: KDE Project
+PackagerName: Adam Pigg
+Categories:
+ - Utility
+Custom:
+  Repo: https://invent.kde.org/utilities/keysmith
+  PackagingRepo: https://github.com/sailfishos-chum/keysmith
+Icon: https://raw.githubusercontent.com/sailfishos-chum/keysmith/main/rpm/keysmith-128.png
+Screenshots:
+ - https://github.com/sailfishos-chum/keysmith/raw/main/screenshot-1.png
+ - https://github.com/sailfishos-chum/keysmith/raw/main/screenshot-2.png
+%endif
 
 %prep
 %autosetup -n %{name}-%{version}/upstream -p1
