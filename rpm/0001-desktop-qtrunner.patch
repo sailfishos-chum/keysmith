@@ -1,0 +1,22 @@
+diff --git a/org.kde.keysmith.desktop b/org.kde.keysmith.desktop
+index 4df49e3..27c8014 100644
+--- a/org.kde.keysmith.desktop
++++ b/org.kde.keysmith.desktop
+@@ -71,10 +71,16 @@ Comment[x-test]=xxManage your OTP tokens for two factor authentication (2fa)xx
+ Comment[zh_CN]=管理 OTP 令牌的双重身份验证 (2fa)
+ Comment[zh_TW]=管理兩步驟驗證 (2FA) 的 OTP 憑證
+ Version=1.0
+-Exec=keysmith %u
++Exec=qt-runner keysmith %u
+ Icon=keysmith
+ Type=Application
+ SingleMainWindow=true
+ Terminal=false
+ Categories=Qt;KDE;Utility
+ MimeType=x-scheme-handler/otpauth;
++
++X-Nemo-Single-Instance=no
++X-Nemo-Application-Type=no-invoker
++
++[X-Sailjail]
++Sandboxing=Disabled
