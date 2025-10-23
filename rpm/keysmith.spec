@@ -1,5 +1,5 @@
 Name:           keysmith
-Version:        23.08.5
+Version:        25.08.2
 Release:        1%{?dist}
 License:        GPLv3+
 Summary:        Convergent OTP client
@@ -10,28 +10,33 @@ Source2:        keysmith-108.png
 Source3:        keysmith-128.png
 Source4:        keysmith-256.png
 
-Patch0:         0001-desktop-qtrunner.patch
+Patch0:         0000-build-for-sailfishos.patch
+Patch1:         0001-desktop-qtrunner.patch
 
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
 BuildRequires:  cmake
-BuildRequires:  opt-extra-cmake-modules
-BuildRequires:  opt-kf5-rpm-macros
+BuildRequires:  kf6-extra-cmake-modules
+BuildRequires:  kf6-rpm-macros
 BuildRequires:  desktop-file-utils
 
 BuildRequires:  libsodium-devel
-BuildRequires:  opt-kf5-ki18n-devel
-BuildRequires:  opt-kf5-kirigami2-devel
-BuildRequires:  opt-kf5-kdbusaddons-devel
-BuildRequires:  opt-kf5-kwindowsystem-devel
-BuildRequires:  opt-qt5-qtdeclarative-devel
-BuildRequires:  opt-qt5-qtsvg-devel
-BuildRequires:  opt-qt5-qtquickcontrols2-devel
+BuildRequires:  kf6-ki18n-devel
+BuildRequires:  kf6-kirigami-devel
+BuildRequires:  kf6-kirigami-addons-devel
+BuildRequires:  kf6-kdbusaddons-devel
+#BuildRequires:  kf6-kwindowsystem-devel
+BuildRequires:  qt6-qtdeclarative-devel
+BuildRequires:  qt6-qtsvg-devel
+BuildRequires:  kf6-kcoreaddons-devel
+BuildRequires:  kf6-kconfig-devel
+BuildRequires:  kf6-prison-devel
 
-Requires:       opt-kf5-kirigami2
-Requires:       qt-runner
+# this is just required because we piggy-back on the Android build spec
+BuildRequires:  pkgconfig(openssl)
 
-%{?opt_kf5_default_filter}
+Requires:       kf6-kirigami
+Requires:       qt-runner-qt6
 
 %description
 OTP client for Plasma Mobile and Desktop
@@ -55,12 +60,10 @@ Screenshots:
 %autosetup -n %{name}-%{version}/upstream -p1
 
 %build
-export QTDIR=%{_opt_qt5_prefix}
-touch .git
-
-%_opt_cmake_kf5 ../ \
-		-DKDE_INSTALL_BINDIR:PATH=/usr/bin \
-		-DCMAKE_INSTALL_PREFIX:PATH=/usr/
+%cmake_kf6 \
+        -DSAILFISHOS=ON \
+        -DKDE_INSTALL_BINDIR:PATH=/usr/bin \
+        -DCMAKE_INSTALL_PREFIX:PATH=/usr/
 %cmake_build
 
 %install
@@ -68,24 +71,21 @@ touch .git
 
 # copy icons
 install -p -m644 -D %{SOURCE1} \
-	%{buildroot}/%{_datadir}/icons/hicolor/86x86/apps/%{name}.png
+    %{buildroot}/%{_datadir}/icons/hicolor/86x86/apps/org.kde.%{name}.png
 install -p -m644 -D %{SOURCE2} \
-	%{buildroot}/%{_datadir}/icons/hicolor/108x108/apps/%{name}.png
+    %{buildroot}/%{_datadir}/icons/hicolor/108x108/apps/org.kde.%{name}.png
 install -p -m644 -D %{SOURCE3} \
-	%{buildroot}/%{_datadir}/icons/hicolor/128x128/apps/%{name}.png
+    %{buildroot}/%{_datadir}/icons/hicolor/128x128/apps/org.kde.%{name}.png
 install -p -m644 -D %{SOURCE4} \
-	%{buildroot}/%{_datadir}/icons/hicolor/256x256/apps/%{name}.png
+    %{buildroot}/%{_datadir}/icons/hicolor/256x256/apps/org.kde.%{name}.png
 
-%check
-#appstreamcli validate --no-net %{buildroot}%{_datadir}/metainfo/org.kde.%{name}.appdata.xml
-#desktop-file-validate %{buildroot}%{_datadir}/applications/org.kde.%{name}.desktop
+%find_lang %{name}
 
-%files
+%files -f %{name}.lang
 %doc README.md
 %license COPYING LICENSES/*.txt
 %{_bindir}/%{name}
 %{_datadir}/applications/org.kde.%{name}.desktop
-%{_opt_kf5_metainfodir}/org.kde.%{name}.appdata.xml
-%{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
-%{_datadir}/locale/
-%{_datadir}/icons/hicolor/*/apps/%{name}.*
+%exclude %{_kf6_metainfodir}/org.kde.%{name}.appdata.xml
+%{_datadir}/icons/hicolor/scalable/apps/org.kde.%{name}.svg
+%{_datadir}/icons/hicolor/*/apps/org.kde.%{name}.*
