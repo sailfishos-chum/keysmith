@@ -1,0 +1,94 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5b7e26c..b3b4feb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -18,6 +18,8 @@ set(KF_MIN_VERSION "6.12.0")
+ set(QT_MIN_VERSION "6.5.0")
+ set(SODIUM_MIN_VERSION "1.0.16")
+ 
++option(SAILFISHOS "Build for Sailfish OS" OFF)
++
+ include(FeatureSummary)
+ 
+ find_package(ECM ${KF_MIN_VERSION} REQUIRED NO_MODULE)
+@@ -54,8 +56,11 @@ ecm_set_disabled_deprecation_versions(QT 6.0.0
+     KF 6.14.0
+ )
+ 
++if (SAILFISHOS)
++    add_compile_definitions(Q_OS_SAILFISH)
++endif()
+ 
+-if(NOT ANDROID)
++if(NOT ANDROID AND NOT SAILFISHOS)
+     find_package(Qt6 ${QT_MIN_VERSION} REQUIRED NO_MODULE COMPONENTS Widgets)
+ endif()
+ 
+@@ -72,13 +77,18 @@ set_package_properties(OpenSSL PROPERTIES
+     PURPOSE "Encrypted communications"
+ )
+ 
+-if (BUILD_DBUS_INTERFACE OR (NOT ANDROID AND NOT HAIKU AND NOT DEFINED BUILD_DBUS_INTERFACE))
++if (BUILD_DBUS_INTERFACE OR (NOT ANDROID AND NOT HAIKU AND NOT SAILFISHOS AND NOT DEFINED BUILD_DBUS_INTERFACE))
+     find_package(KF6DBusAddons ${KF_MIN_VERSION} REQUIRED)
+     find_package(KF6WindowSystem ${KF_MIN_VERSION} REQUIRED)
+     set(ENABLE_DBUS_INTERFACE ON)
+ endif()
+ 
+-if (NOT ANDROID)
++if (BUILD_DBUS_INTERFACE AND SAILFISHOS)
++    find_package(KF6DBusAddons ${KF_MIN_VERSION} REQUIRED)
++    set(ENABLE_DBUS_INTERFACE ON)
++endif()
++
++if(NOT ANDROID AND NOT SAILFISHOS)
+     find_package(KF6QQC2DesktopStyle ${KF_MIN_VERSION} REQUIRED)
+     set_package_properties(KF6QQC2DesktopStyle PROPERTIES
+         TYPE RUNTIME
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 03ca9a7..c3af362 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -97,7 +97,9 @@ if(ANDROID)
+     ecm_add_android_apk(keysmith ANDROID_DIR ${CMAKE_SOURCE_DIR}/android)
+     install(FILES ${CMAKE_SOURCE_DIR}/org.kde.keysmith.svg DESTINATION ${KDE_INSTALL_QMLDIR}/org/kde/kirigami/breeze-internal/icons/)
+ else()
+-    target_link_libraries(keysmith PUBLIC Qt6::Widgets)
++    if(NOT SAILFISHOS)
++        target_link_libraries(keysmith PUBLIC Qt6::Widgets)
++    endif()
+ endif()
+ 
+ install(TARGETS keysmith ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
+diff --git a/src/main.cpp b/src/main.cpp
+index bb58d83..e82897b 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -12,7 +12,7 @@
+ #include <QUrl>
+ #include <QtQml>
+ 
+-#ifdef Q_OS_ANDROID
++#if defined Q_OS_ANDROID || defined Q_OS_SAILFISH
+ #include <QGuiApplication>
+ #else
+ #include <QApplication>
+@@ -55,11 +55,18 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
+ #ifdef Q_OS_ANDROID
+     QGuiApplication app(argc, argv);
+     QQuickStyle::setStyle(QStringLiteral("org.kde.breeze"));
++#else
++#ifdef Q_OS_SAILFISH
++    QGuiApplication app(argc, argv);
++    if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
++        QQuickStyle::setStyle(QStringLiteral("org.kde.breeze"));
++    }
+ #else
+     QApplication app(argc, argv);
+     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
+         QQuickStyle::setStyle(QStringLiteral("org.kde.desktop"));
+     }
++#endif
+ #endif
+ 
+     KLocalizedString::setApplicationDomain("keysmith");
