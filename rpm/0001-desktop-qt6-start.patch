@@ -7,7 +7,7 @@ index 24583a9..1c54940 100644
  Comment[zh_TW]=管理兩步驟驗證 (2FA) 的 OTP 憑證
  Version=1.0
 -Exec=keysmith %u
-+Exec=qt-runner keysmith %u
++Exec=qt6-start.sh keysmith %u
  Icon=org.kde.keysmith
  Type=Application
  SingleMainWindow=true

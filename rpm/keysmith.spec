@@ -1,5 +1,5 @@
 Name:           keysmith
-Version:        25.08.2
+Version:        26.04.3
 Release:        1%{?dist}
 License:        GPLv3+
 Summary:        Convergent OTP client
@@ -11,7 +11,7 @@ Source3:        keysmith-128.png
 Source4:        keysmith-256.png
 
 Patch0:         0000-build-for-sailfishos.patch
-Patch1:         0001-desktop-qtrunner.patch
+Patch1:         0001-desktop-qt6-start.patch
 
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
